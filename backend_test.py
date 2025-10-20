@@ -348,7 +348,7 @@ class StudentMarksAPITester:
             self.test_get_student_marks(student_user['id'])
 
             # Test student dashboard
-            self.test_student_dashboard(student_user['id'])
+            self.test_student_dashboard(student_user)
 
         return self.generate_report()
 
