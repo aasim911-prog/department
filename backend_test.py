@@ -268,12 +268,14 @@ class StudentMarksAPITester:
         )
         return success, response
 
-    def test_student_dashboard(self, student_id):
+    def test_student_dashboard(self, student_data):
         """Test student dashboard with CGPA/SGPA calculations"""
         if not self.student_token:
             self.log_test("Student Dashboard", False, "No student token available")
             return False, {}
 
+        # Use student_id (string identifier) not UUID
+        student_id = student_data.get('student_id')
         headers = {'Authorization': f'Bearer {self.student_token}'}
         success, response = self.run_test(
             "Student Dashboard",
