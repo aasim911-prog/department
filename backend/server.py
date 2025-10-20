@@ -320,8 +320,8 @@ async def get_student_dashboard(student_id: str, token_data: dict = Depends(veri
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
     
-    # Get all marks
-    marks_list = await db.marks.find({"student_id": student_id}, {"_id": 0}).to_list(1000)
+    # Get all marks using the student's database ID
+    marks_list = await db.marks.find({"student_id": student["id"]}, {"_id": 0}).to_list(1000)
     
     # Get all subjects
     all_subjects = await db.subjects.find({"department": student["department"]}, {"_id": 0}).to_list(1000)
