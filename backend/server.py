@@ -11,6 +11,7 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone, timedelta
 import jwt
+from jwt import exceptions as jwt_exceptions
 from passlib.context import CryptContext
 
 ROOT_DIR = Path(__file__).parent
@@ -107,9 +108,9 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
         token = credentials.credentials
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
-    except jwt.ExpiredSignatureError:
+    except jwt_exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.JWTError:
+    except jwt_exceptions.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
 def calculate_grade_point(marks: float) -> float:
@@ -380,10 +381,16 @@ async def get_student_dashboard(student_id: str, token_data: dict = Depends(veri
 
 app.include_router(api_router)
 
+# CORS configuration
+_cors_origins_raw = os.environ.get('CORS_ORIGINS', '*')
+_cors_origins = [o.strip() for o in _cors_origins_raw.split(',') if o.strip()]
+# When allowing all origins ("*"), credentials must be disabled per CORS spec
+_allow_credentials = False if _cors_origins == ['*'] else True
+
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_credentials=_allow_credentials,
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
